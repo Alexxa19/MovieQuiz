@@ -93,7 +93,7 @@ final class StatisticService: StatisticServiceProtocol {
             date: Date()
         )
 
-        if currentGame.correct > bestGame.correct {
+        if currentGame > bestGame {
             bestGame = currentGame
         }
     }
