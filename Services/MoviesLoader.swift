@@ -1,4 +1,9 @@
+
 import Foundation
+
+private enum MoviesLoaderError: Error {
+    case serverError(String)
+}
 
 protocol MoviesLoading {
     func loadMovies(handler: @escaping (Result<MostPopularMovies, Error>) -> Void)
@@ -20,6 +25,12 @@ struct MoviesLoader: MoviesLoading {
             case .success(let data):
                 do {
                     let mostPopularMovies = try JSONDecoder().decode(MostPopularMovies.self, from: data)
+
+                    if !mostPopularMovies.errorMessage.isEmpty {
+                        handler(.failure(MoviesLoaderError.serverError(mostPopularMovies.errorMessage)))
+                        return
+                    }
+
                     handler(.success(mostPopularMovies))
                 } catch {
                     handler(.failure(error))
