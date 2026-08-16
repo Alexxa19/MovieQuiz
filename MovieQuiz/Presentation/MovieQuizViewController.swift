@@ -1,10 +1,20 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription)
+    }
+    
     // MARK: - IBOutlets
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var questionLabel: UILabel!
     @IBOutlet private var questionNumberLabel: UILabel!
+    @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Private Properties
     private var currentQuestionIndex = 0
@@ -29,11 +39,26 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        let questionFactory = QuestionFactory()
-        questionFactory.delegate = self
-        self.questionFactory = questionFactory
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        showLoadingIndicator()
+        questionFactory?.loadData()
+    }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func showNetworkError(message: String) {
+        let model = AlertModel(
+            title: "Произошла ошибка",
+            message: message,
+            buttonText: "Попробовать снова"
+        ) { [weak self] in
+            self?.questionFactory?.loadData()
+        }
 
-        questionFactory.requestNextQuestion()
+        alertPresenter.show(in: self, model: model)
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -53,7 +78,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         QuizStepViewModel(
-            image: UIImage(named: model.image) ?? UIImage(),
+            image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)"
         )
@@ -107,7 +132,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
 
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
-            (self.questionFactory as? QuestionFactory)?.reset()
             self.questionFactory?.requestNextQuestion()
         }
 
