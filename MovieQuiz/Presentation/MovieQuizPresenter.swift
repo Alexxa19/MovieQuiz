@@ -3,6 +3,13 @@ import Foundation
 final class MovieQuizPresenter: QuestionFactoryDelegate {
     private weak var viewController: MovieQuizViewControllerProtocol?
     private let statisticService: StatisticServiceProtocol
+    private var questionFactory: QuestionFactoryProtocol
+
+    let questionsAmount: Int = 10
+    private var currentQuestionIndex: Int = 0
+    private var correctAnswers: Int = 0
+    private var currentQuestion: QuizQuestion?
+    private var isAnswerProcessing = false
 
     init(
         viewController: MovieQuizViewControllerProtocol,
@@ -13,7 +20,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         self.questionFactory = questionFactory
         self.statisticService = statisticService
 
-        self.questionFactory?.delegate = self
+        self.questionFactory.delegate = self
         questionFactory.loadData()
         viewController.showLoadingIndicator()
     }
@@ -22,19 +29,12 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
 
     func didLoadDataFromServer() {
         viewController?.hideLoadingIndicator()
-        questionFactory?.requestNextQuestion()
+        questionFactory.requestNextQuestion()
     }
 
     func didFailToLoadData(with error: Error) {
         viewController?.showNetworkError(message: error.localizedDescription)
     }
-
-    let questionsAmount: Int = 10
-    private var currentQuestionIndex: Int = 0
-    private var correctAnswers: Int = 0
-    private var currentQuestion: QuizQuestion?
-    private var isAnswerProcessing = false
-    private var questionFactory: QuestionFactoryProtocol?
     
     func convert(model: QuizQuestion) -> QuizStepViewModel {
         QuizStepViewModel(
@@ -61,7 +61,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         currentQuestionIndex = 0
         correctAnswers = 0
         isAnswerProcessing = false
-        questionFactory?.requestNextQuestion()
+        questionFactory.requestNextQuestion()
     }
 
     func switchToNextQuestion() {
@@ -108,7 +108,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             viewController?.show(quiz: viewModel)
         } else {
             switchToNextQuestion()
-            questionFactory?.requestNextQuestion()
+            questionFactory.requestNextQuestion()
         }
     }
 

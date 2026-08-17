@@ -16,26 +16,27 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     var presenter: MovieQuizPresenter!
     
     // MARK: - IBOutlets
-    @IBOutlet private var imageView: UIImageView!
-    @IBOutlet private var questionLabel: UILabel!
-    @IBOutlet private var questionNumberLabel: UILabel!
-    @IBOutlet private var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet private weak var imageView: UIImageView!
+    @IBOutlet private weak var questionLabel: UILabel!
+    @IBOutlet private weak var questionNumberLabel: UILabel!
+    @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Private Properties
     private var alertPresenter = AlertPresenter()
     
-    // MARK: - IBActions
-    @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        presenter.yesButtonClicked()
-    }
-    
-    @IBAction private func noButtonClicked(_ sender: UIButton) {
-        presenter.noButtonClicked()
-    }
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+    }
+
+    // MARK: - IBActions
+    @IBAction private func yesButtonClicked(_ sender: UIButton) {
+        presenter.yesButtonClicked()
+    }
+
+    @IBAction private func noButtonClicked(_ sender: UIButton) {
+        presenter.noButtonClicked()
     }
     
     func showLoadingIndicator() {
