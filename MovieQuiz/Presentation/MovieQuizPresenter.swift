@@ -4,12 +4,17 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     private weak var viewController: MovieQuizViewControllerProtocol?
     private let statisticService: StatisticServiceProtocol
 
-    init(viewController: MovieQuizViewControllerProtocol) {
+    init(
+        viewController: MovieQuizViewControllerProtocol,
+        questionFactory: QuestionFactoryProtocol,
+        statisticService: StatisticServiceProtocol
+    ) {
         self.viewController = viewController
-        statisticService = StatisticService()
+        self.questionFactory = questionFactory
+        self.statisticService = statisticService
 
-        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
-        questionFactory?.loadData()
+        self.questionFactory?.delegate = self
+        questionFactory.loadData()
         viewController.showLoadingIndicator()
     }
     
@@ -28,6 +33,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     private var currentQuestionIndex: Int = 0
     private var correctAnswers: Int = 0
     private var currentQuestion: QuizQuestion?
+    private var isAnswerProcessing = false
     private var questionFactory: QuestionFactoryProtocol?
     
     func convert(model: QuizQuestion) -> QuizStepViewModel {
@@ -54,6 +60,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     func restartGame() {
         currentQuestionIndex = 0
         correctAnswers = 0
+        isAnswerProcessing = false
         questionFactory?.requestNextQuestion()
     }
 
@@ -66,22 +73,29 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         }
     }
 
-    func yesButtonClicked() -> Bool {
+    func yesButtonClicked() {
         didAnswer(isYes: true)
     }
 
-    func noButtonClicked() -> Bool {
+    func noButtonClicked() {
         didAnswer(isYes: false)
     }
 
-    private func didAnswer(isYes: Bool) -> Bool {
-        guard let currentQuestion = currentQuestion else {
-            return false
-        }
+    private func didAnswer(isYes: Bool) {
+        guard !isAnswerProcessing else { return }
+        guard let currentQuestion = currentQuestion else { return }
+
+        isAnswerProcessing = true
 
         let isCorrect = isYes == currentQuestion.correctAnswer
         didAnswer(isCorrect: isCorrect)
-        return isCorrect
+        viewController?.highlightImageBorder(isCorrectAnswer: isCorrect)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self = self else { return }
+            self.isAnswerProcessing = false
+            self.showNextQuestionOrResults()
+        }
     }
 
     func showNextQuestionOrResults() {

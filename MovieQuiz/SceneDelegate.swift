@@ -10,6 +10,23 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         options connectionOptions: UIScene.ConnectionOptions
     ) {
         guard (scene as? UIWindowScene) != nil else { return }
+        
+        guard let viewController = window?.rootViewController as? MovieQuizViewController else {
+            return
+        }
+        
+        viewController.loadViewIfNeeded()
+        
+        let moviesLoader = MoviesLoader()
+        let questionFactory = QuestionFactory(moviesLoader: moviesLoader)
+        let statisticService = StatisticService()
+        let presenter = MovieQuizPresenter(
+            viewController: viewController,
+            questionFactory: questionFactory,
+            statisticService: statisticService
+        )
+        
+        viewController.presenter = presenter
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {}

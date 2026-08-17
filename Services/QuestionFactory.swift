@@ -2,13 +2,12 @@ import Foundation
 
 final class QuestionFactory: QuestionFactoryProtocol {
     private let moviesLoader: MoviesLoading
-    private weak var delegate: QuestionFactoryDelegate?
+    weak var delegate: QuestionFactoryDelegate?
 
     private var movies: [MostPopularMovie] = []
 
-    init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate?) {
+    init(moviesLoader: MoviesLoading) {
         self.moviesLoader = moviesLoader
-        self.delegate = delegate
     }
 
     func loadData() {

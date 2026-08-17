@@ -13,7 +13,7 @@ protocol MovieQuizViewControllerProtocol: AnyObject {
 }
 
 final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
-    private var presenter: MovieQuizPresenter!
+    var presenter: MovieQuizPresenter!
     
     // MARK: - IBOutlets
     @IBOutlet private var imageView: UIImageView!
@@ -22,24 +22,20 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Private Properties
-    private var isAnswerProcessing = false
-    
     private var alertPresenter = AlertPresenter()
     
     // MARK: - IBActions
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        checkAnswer(true)
+        presenter.yesButtonClicked()
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        checkAnswer(false)
+        presenter.noButtonClicked()
     }
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        presenter = MovieQuizPresenter(viewController: self)
     }
     
     func showLoadingIndicator() {
@@ -70,27 +66,8 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
         imageView.layer.borderWidth = 0
         imageView.layer.cornerRadius = 20
         imageView.layer.masksToBounds = true
-        isAnswerProcessing = false
     }
 
-    private func checkAnswer(_ answer: Bool) {
-        guard !isAnswerProcessing else { return }
-        isAnswerProcessing = true
-
-        let isCorrect: Bool
-        if answer {
-            isCorrect = presenter.yesButtonClicked()
-        } else {
-            isCorrect = presenter.noButtonClicked()
-        }
-
-        highlightImageBorder(isCorrectAnswer: isCorrect)
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self = self else { return }
-            self.presenter.showNextQuestionOrResults()
-        }
-    }
 
     func highlightImageBorder(isCorrectAnswer: Bool) {
         imageView.layer.masksToBounds = true

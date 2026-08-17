@@ -27,7 +27,13 @@ final class MovieQuizViewControllerMock: MovieQuizViewControllerProtocol {
 final class MovieQuizPresenterTests: XCTestCase {
     func testPresenterConvertModel() throws {
         let viewControllerMock = MovieQuizViewControllerMock()
-        let sut = MovieQuizPresenter(viewController: viewControllerMock)
+        let questionFactory = QuestionFactory(moviesLoader: MoviesLoader())
+        let statisticService = StatisticService()
+        let sut = MovieQuizPresenter(
+            viewController: viewControllerMock,
+            questionFactory: questionFactory,
+            statisticService: statisticService
+        )
 
         let emptyData = Data()
         let question = QuizQuestion(image: emptyData, text: "Question Text", correctAnswer: true)
